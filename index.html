@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>EMOM Training Timer</title>
+  <style>
+    :root {
+      --bg-color: #080c15;
+      --card-bg: #121929;
+      --card-border: #1f2c47;
+      --accent: #10b981; /* Neon Emerald */
+      --accent-cyan: #06b6d4;
+      --accent-glow: rgba(16, 185, 129, 0.4);
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-digits: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, 'Roboto Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      overflow-x: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top, 1rem) env(safe-area-inset-right, 1rem) env(safe-area-inset-bottom, 1rem) env(safe-area-inset-left, 1rem);
+      transition: background-color 0.3s ease;
+    }
+
+    /* Container: Standard für Setup, erweitert sich im Workout für PC & Handy */
+    .container {
+      width: 100%;
+      max-width: 650px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: max-width 0.35s ease, padding 0.35s ease;
+    }
+
+    /* WIDE ARENA MODE: Wenn Workout läuft, viel Platz auf dem PC nutzen */
+    body.workout-active .container {
+      max-width: min(96vw, 1550px);
+      width: 96vw;
+      gap: 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    header h1 {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #34d399, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: clamp(0.9rem, 2vw, 1.15rem);
+      margin-top: 0.25rem;
+    }
+
+    /* Im Workout-Modus ist der Header dezenter */
+    body.workout-active header {
+      display: none;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: clamp(1.25rem, 3vw, 2.25rem);
+      padding: clamp(1.25rem, 3vw, 2.5rem);
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 10px 15px -8px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Optischer Puls bei neuem Minuten-Beginn */
+    .card.flash-minute {
+      animation: pulseGreen 0.75s ease-out;
+    }
+
+    @keyframes pulseGreen {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.9), 0 0 50px var(--accent-glow);
+        border-color: #34d399;
+      }
+      60% {
+        box-shadow: 0 0 0 25px rgba(16, 185, 129, 0), 0 0 60px var(--accent-glow);
+      }
+      100% {
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6);
+        border-color: var(--card-border);
+      }
+    }
+
+    /* =========================================
+       SETUP VIEW
+       ========================================= */
+    .setup-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .input-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .number-input-wrapper {
+      position: relative;
+      margin-top: 0.5rem;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      background: #090e1a;
+      border: 2px solid var(--card-border);
+      color: #fff;
+      font-size: 2.25rem;
+      font-family: var(--font-digits);
+      font-weight: 800;
+      text-align: center;
+      border-radius: 1.25rem;
+      padding: 0.85rem;
+      outline: none;
+      transition: all 0.2s ease;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+
+    .quick-presets {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn-preset {
+      background: #192237;
+      border: 1px solid #2b3959;
+      color: var(--text-main);
+      padding: 0.75rem 0.5rem;
+      border-radius: 0.9rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-preset:hover {
+      background: #23304e;
+      border-color: #3b4f7d;
+      transform: translateY(-1px);
+    }
+
+    .btn-preset.active {
+      background: var(--accent);
+      color: #032e25;
+      border-color: var(--accent);
+      box-shadow: 0 3px 12px var(--accent-glow);
+    }
+
+    .options-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      cursor: pointer;
+    }
+
+    .toggle-label input[type="checkbox"] {
+      width: 1.25rem;
+      height: 1.25rem;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .sound-settings-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      background: #0b1120;
+      padding: 0.85rem 1.15rem;
+      border-radius: 1rem;
+      border: 1px solid #1a253d;
+    }
+
+    /* =========================================
+       WORKOUT TIMER VIEW (ARENA MODE)
+       ========================================= */
+    .timer-display-view {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    /* Auf Desktop PC: Großes 2-Spalten Layout */
+    .workout-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (min-width: 900px) {
+      .workout-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        align-items: center;
+        gap: 3rem;
+      }
+    }
+
+    /* Linke Spalte: Runder Stadium-Timer */
+    .arena-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Rechte Spalte: Stats & Kontrollen */
+    .arena-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .top-status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 9999px;
+      font-size: clamp(0.9rem, 2vw, 1.15rem);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 2px solid rgba(16, 185, 129, 0.35);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+
+    .status-badge.prep {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.45);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+    }
+
+    .status-badge.paused {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.45);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+    }
+
+    .status-badge.finished {
+      background: rgba(6, 182, 212, 0.2);
+      color: #38bdf8;
+      border-color: rgba(6, 182, 212, 0.45);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+    }
+
+    .round-indicator {
+      font-size: clamp(1.8rem, 4.5vw, 3.25rem);
+      font-weight: 900;
+      color: #f1f5f9;
+      letter-spacing: -0.02em;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .round-indicator span {
+      color: var(--accent);
+      text-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    /* Riesiger Fortschrittsring */
+    .progress-circle-wrap {
+      position: relative;
+      width: clamp(260px, 44vmin, 480px);
+      height: clamp(260px, 44vmin, 480px);
+      margin: 0.5rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      container-type: inline-size;
+    }
+
+    .progress-svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .progress-bg {
+      fill: none;
+      stroke: #162035;
+      stroke-width: 14;
+    }
+
+    .progress-bar {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 754;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.08s linear, stroke 0.3s ease;
+      filter: drop-shadow(0 0 8px var(--accent-glow));
+    }
+
+    .progress-bar.warning {
+      stroke: var(--accent-warning);
+      filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5));
+    }
+
+    .circle-content {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 72%;
+      height: 72%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+
+    /* RIESIGE ZIFFERN, präzise in den Kreis eingepasst */
+    .minute-seconds-text {
+      font-size: clamp(4.5rem, 36cqw, 10.5rem);
+      font-family: var(--font-digits);
+      font-weight: 900;
+      line-height: 0.88;
+      color: #ffffff;
+      text-shadow: 0 0 35px rgba(255, 255, 255, 0.25);
+      font-variant-numeric: tabular-nums;
+      margin: 0;
+      padding: 0;
+    }
+
+    .minute-subtext {
+      font-size: clamp(0.75rem, 5.2cqw, 1.15rem);
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-top: clamp(0.25rem, 1.8cqw, 0.65rem);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    /* Übersichtskarten für Gesamtzeit */
+    .stats-dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .stat-card {
+      background: #090e1a;
+      border: 1px solid #1a253c;
+      border-radius: clamp(1rem, 2vw, 1.5rem);
+      padding: clamp(1rem, 2.5vw, 1.75rem);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stat-card .lbl {
+      font-size: clamp(0.8rem, 1.6vw, 1.05rem);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-card .val {
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      font-family: var(--font-digits);
+      font-weight: 900;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    .stat-card.highlight .val {
+      color: #38bdf8;
+      text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    }
+
+    /* Grosse Action Buttons */
+    .controls {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: clamp(1rem, 2.5vh, 1.4rem) 1.5rem;
+      border-radius: clamp(1rem, 2vw, 1.4rem);
+      font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #022c22;
+      box-shadow: 0 6px 25px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      background: #059669;
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    .btn-pause {
+      background: #eab308;
+      color: #3f1d04;
+      box-shadow: 0 6px 20px rgba(234, 179, 8, 0.3);
+    }
+
+    .btn-pause:hover {
+      background: #ca8a04;
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background: #1c263c;
+      color: #cbd5e1;
+      border: 1px solid #334366;
+    }
+
+    .btn-secondary:hover {
+      background: #283756;
+      color: #ffffff;
+    }
+
+    .btn-test {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px dashed #334155;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.6rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-test:hover {
+      color: #ffffff;
+      border-color: #64748b;
+    }
+
+    /* Screen Shake & Pulse */
+    @keyframes minuteBell {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.09); }
+      100% { transform: scale(1); }
+    }
+
+    .pulse-text {
+      animation: minuteBell 0.4s ease-out;
+    }
+
+    /* =========================================
+       FOOTER & IPHONE WAKE LOCK INDICATOR
+       ========================================= */
+    .footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      padding: 0 0.5rem;
+      width: 100%;
+    }
+
+    /* Unsichtbares Video für iOS Safari No-Sleep */
+    #nosleep-video {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0.01;
+      pointer-events: none;
+      z-index: -100;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Unsichtbares Video-Element für iOS iPhone Sleep-Schutz -->
+  <video id="nosleep-video" playsinline webkit-playsinline loop muted preload="auto">
+    <!-- 337-Byte Blank MP4 Video H.264 Data URI -->
+    <source type="video/mp4" src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAsxtZGF0AAACrQYF//+//vXb8yyubp//AAAC7W1vb3YAAABsbXZoZAAAAAAAAAAAAAAAAAAAA+//wAAADBhdmNDAfQACv/hABdn9AAKkZsr02QAAAMABAAAAwDIPEiWWAEABmjr48RIRAAAABhzdHRzAAAAAAAAAAEAAAABAAACAAAAABxzdHNjAAAAAAAAAAEAAAABAAAAAQAAAAEAAAAUc3RzegAAAAAAAALEAAAAAQAAABRzdGNvAAAAAAAAAAEAAAAwAAAAYnVkdGEAAABabWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRpcmFwcGwAAAAAAAAAAAAAAAAtaWxzdAAAACWpdG9vAAAAHWRhdGEAAAABAAAAAExhdmY1Ny41Ni4xMDE=">
+  </video>
+
+  <div class="container">
+    <header id="siteHeader">
+      <h1>EMOM TIMER</h1>
+      <p>Every Minute On the Minute — Intervalltraining</p>
+    </header>
+
+    <div class="card" id="mainCard">
+      <!-- SETUP VIEW -->
+      <div id="setupView" class="setup-group">
+        <div>
+          <label for="minutesInput" class="input-label">Gesamtdauer (Minuten)</label>
+          <div class="number-input-wrapper">
+            <input type="number" id="minutesInput" min="1" max="180" value="10" placeholder="10">
+          </div>
+        </div>
+
+        <div>
+          <div class="input-label">Schnellauswahl</div>
+          <div class="quick-presets">
+            <button type="button" class="btn-preset" data-min="5">5 Min</button>
+            <button type="button" class="btn-preset active" data-min="10">10 Min</button>
+            <button type="button" class="btn-preset" data-min="15">15 Min</button>
+            <button type="button" class="btn-preset" data-min="20">20 Min</button>
+            <button type="button" class="btn-preset" data-min="25">25 Min</button>
+            <button type="button" class="btn-preset" data-min="30">30 Min</button>
+            <button type="button" class="btn-preset" data-min="45">45 Min</button>
+            <button type="button" class="btn-preset" data-min="60">60 Min</button>
+          </div>
+        </div>
+
+        <div class="options-row">
+          <label class="toggle-label" title="10 Sekunden Vorbereitungszeit vor Beginn des Workouts">
+            <input type="checkbox" id="prepCountdownCheckbox" checked>
+            <span>10 Sek. Vorbereitung</span>
+          </label>
+
+          <label class="toggle-label" title="Piept bei Sekunde 5, 4, 3, 2, 1 vor jeder neuen Minute">
+            <input type="checkbox" id="warningBeepsCheckbox" checked>
+            <span>5-4-3-2-1 Countdown-Piepser</span>
+          </label>
+        </div>
+
+        <div class="sound-settings-bar">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <button type="button" id="btnTestSound" class="btn-test">
+              🔊 Ton testen
+            </button>
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-muted);">
+              <span>Lautstärke:</span>
+              <input type="range" id="volumeSlider" min="0.1" max="1" step="0.05" value="0.75" style="width: 85px; accent-color: var(--accent);">
+            </label>
+          </div>
+          <span style="font-size: 0.85rem; color: #38bdf8;">🔔 Jede Minute ertönt ein Signal</span>
+        </div>
+
+        <button type="button" id="btnStart" class="btn btn-primary" style="font-size: 1.3rem; padding: 1.25rem;">
+          ▶ Training Starten
+        </button>
+      </div>
+
+      <!-- RUNNING TIMER VIEW (ARENA MODE) -->
+      <div id="timerView" class="timer-display-view" style="display: none;">
+        <div class="top-status-header">
+          <div id="statusBadge" class="status-badge">Minute läuft</div>
+          <button type="button" id="btnFullscreenTop" class="btn-test" style="border-radius: 9999px;">
+            ⛶ Vollbild
+          </button>
+        </div>
+
+        <div class="workout-grid">
+          <!-- Arena Linke Spalte (Kreis-Timer) -->
+          <div class="arena-left">
+            <div class="round-indicator" id="roundIndicator">
+              Minute <span id="currentRound">1</span> von <span id="totalRounds">10</span>
+            </div>
+
+            <!-- Großer Fortschrittsring -->
+            <div class="progress-circle-wrap">
+              <svg class="progress-svg" viewBox="0 0 260 260">
+                <circle class="progress-bg" cx="130" cy="130" r="120" />
+                <circle id="progressBar" class="progress-bar" cx="130" cy="130" r="120" />
+              </svg>
+              <div class="circle-content">
+                <div class="minute-seconds-text" id="minuteTimerDisplay">60</div>
+                <div class="minute-subtext" id="minuteTimerSubtext">Sekunden</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arena Rechte Spalte (Dashboard & Kontrollen) -->
+          <div class="arena-right">
+            <div class="stats-dashboard">
+              <div class="stat-card highlight">
+                <div class="lbl">Verbleibende Gesamtzeit</div>
+                <div class="val" id="totalRemainingDisplay">10:00</div>
+              </div>
+              <div class="stat-card">
+                <div class="lbl">Bereits Verstrichen</div>
+                <div class="val" id="totalElapsedDisplay">00:00</div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="padding: 1rem;">
+              <div class="lbl">Status / Phase</div>
+              <div class="val" id="currentIntervalDisplay" style="color: var(--accent); font-size: clamp(1.4rem, 3vw, 2.2rem);">Runde 1</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="controls">
+              <button type="button" id="btnPauseResume" class="btn btn-pause">
+                ⏸ Pause
+              </button>
+              <button type="button" id="btnReset" class="btn btn-secondary">
+                ⏹ Beenden
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Controls -->
+    <div class="footer-bar" style="justify-content: flex-end;">
+      <button type="button" id="btnFullscreenBottom" class="btn-test">
+        ⛶ Vollbildmodus
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. BULLETPROOF SCREEN SLEEP PREVENTION (iPhone / iOS & PC / Android)
+    // =========================================================================
+    // iOS Safari schaltet oft nach 30-60 Sekunden ab, falls keine aktive Video-/
+    // Medienwiedergabe läuft. Wir kombinieren:
+    // a) Native Screen Wake Lock API (Desktop & moderne Browser)
+    // b) Unsichtbare stumme Loop-Videowiedergabe (NoSleep-Technik speziell für iPhone Safari)
+    const nosleepVideo = document.getElementById('nosleep-video');
+    let wakeLockSentinel = null;
+    let isWakeLockEnabled = false;
+
+    async function enableSleepPrevention() {
+      isWakeLockEnabled = true;
+
+      // 1. iOS Safari Workaround: Stummes Endlos-Video abspielen
+      if (nosleepVideo) {
+        try {
+          const playPromise = nosleepVideo.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              // Browser blockierte Autoplay noch vor Nutzergeste
+              console.log('Video autoplay wartet auf Interaktion:', err);
+            });
+          }
+        } catch (e) {
+          console.warn('Video play error:', e);
+        }
+      }
+
+      // 2. Native Wake Lock API anfordern
+      if ('wakeLock' in navigator) {
+        try {
+          if (!wakeLockSentinel) {
+            wakeLockSentinel = await navigator.wakeLock.request('screen');
+            wakeLockSentinel.addEventListener('release', () => {
+              wakeLockSentinel = null;
+              if (isWakeLockEnabled && document.visibilityState === 'visible') {
+                enableSleepPrevention();
+              }
+            });
+          }
+        } catch (err) {
+          console.log('WakeLock API nicht verfügbar (Video-Fallback aktiv):', err);
+        }
+      }
+    }
+
+    function disableSleepPrevention() {
+      isWakeLockEnabled = false;
+      if (wakeLockSentinel) {
+        wakeLockSentinel.release().catch(() => {});
+        wakeLockSentinel = null;
+      }
+      if (nosleepVideo) {
+        try {
+          nosleepVideo.pause();
+        } catch (e) {}
+      }
+    }
+
+    // Sofort bei Nutzer-Berührung (Touch/Click) den Schutz aktivieren
+    ['touchstart', 'touchend', 'click'].forEach(evtType => {
+      document.addEventListener(evtType, () => {
+        if (!isWakeLockEnabled || (nosleepVideo && nosleepVideo.paused)) {
+          enableSleepPrevention();
+        }
+      }, { passive: true });
+    });
+
+    // Re-aktivieren, wenn Tab wieder in den Vordergrund kommt (z.B. iPhone entsperrt)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        enableSleepPrevention();
+      }
+    });
+    window.addEventListener('focus', enableSleepPrevention);
+    window.addEventListener('pageshow', enableSleepPrevention);
+
+    // Initial versuchen direkt zu aktivieren
+    enableSleepPrevention();
+
+    // =========================================================================
+    // 2. WEB AUDIO API SYNTHESIZER (100% Offline & Zuverlässig)
+    // =========================================================================
+    let audioCtx = null;
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function getMasterVolume() {
+      return volumeSlider ? parseFloat(volumeSlider.value) : 0.75;
+    }
+
+    function playBeep(frequency, durationMs, type = 'sine', volume = 0.7) {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const effectiveVolume = volume * getMasterVolume();
+        if (effectiveVolume <= 0.001) return;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+
+        gain.gain.setValueAtTime(0.001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(effectiveVolume, ctx.currentTime + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (durationMs / 1000));
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + (durationMs / 1000) + 0.05);
+      } catch (err) {
+        console.warn('Audio play error:', err);
+      }
+    }
+
+    function playWarningBeep() {
+      playBeep(520, 150, 'triangle', 0.6);
+    }
+
+    function playNewMinuteSignal() {
+      // Markanter Doppelton (Gong/Gym Signal)
+      playBeep(880, 200, 'sine', 0.85);
+      setTimeout(() => {
+        playBeep(1174.66, 350, 'sine', 0.95);
+      }, 160);
+    }
+
+    function playWorkoutCompleteSignal() {
+      const notes = [587.33, 739.99, 880, 1174.66];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => {
+          playBeep(freq, 300, 'triangle', 0.9);
+        }, idx * 190);
+      });
+    }
+
+    // =========================================================================
+    // 3. TIMER LOGIK & ARENA DISPLAY
+    // =========================================================================
+    let totalMinutes = 10;
+    let prepSeconds = 10;
+    let hasPrep = true;
+    let hasWarningBeeps = true;
+
+    let isRunning = false;
+    let isPaused = false;
+    let isPrepPhase = false;
+
+    let startTime = 0;
+    let pausedTimeAccumulated = 0;
+    let pauseStartTimestamp = 0;
+    let animationFrameId = null;
+
+    let totalDurationMs = 0;
+    let prepDurationMs = 0;
+    let lastWarningSecond = -1;
+    let lastAnnouncedRound = 0;
+
+    // DOM Elements
+    const setupView = document.getElementById('setupView');
+    const timerView = document.getElementById('timerView');
+    const mainCard = document.getElementById('mainCard');
+    const minutesInput = document.getElementById('minutesInput');
+    const prepCheckbox = document.getElementById('prepCountdownCheckbox');
+    const warningBeepsCheckbox = document.getElementById('warningBeepsCheckbox');
+
+    const statusBadge = document.getElementById('statusBadge');
+    const currentRoundEl = document.getElementById('currentRound');
+    const totalRoundsEl = document.getElementById('totalRounds');
+    const minuteTimerDisplay = document.getElementById('minuteTimerDisplay');
+    const minuteTimerSubtext = document.getElementById('minuteTimerSubtext');
+    const progressBar = document.getElementById('progressBar');
+    const totalRemainingDisplay = document.getElementById('totalRemainingDisplay');
+    const totalElapsedDisplay = document.getElementById('totalElapsedDisplay');
+    const currentIntervalDisplay = document.getElementById('currentIntervalDisplay');
+
+    const btnStart = document.getElementById('btnStart');
+    const btnPauseResume = document.getElementById('btnPauseResume');
+    const btnReset = document.getElementById('btnReset');
+    const btnTestSound = document.getElementById('btnTestSound');
+    const btnFullscreenTop = document.getElementById('btnFullscreenTop');
+    const btnFullscreenBottom = document.getElementById('btnFullscreenBottom');
+    const presetButtons = document.querySelectorAll('.btn-preset');
+
+    const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 120; // ~753.98
+
+    // Presets Click Handler
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const min = parseInt(btn.dataset.min, 10);
+        minutesInput.value = min;
+      });
+    });
+
+    minutesInput.addEventListener('input', () => {
+      const val = parseInt(minutesInput.value, 10);
+      presetButtons.forEach(b => {
+        if (parseInt(b.dataset.min, 10) === val) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+    });
+
+    btnTestSound.addEventListener('click', () => {
+      getAudioContext();
+      enableSleepPrevention();
+      playNewMinuteSignal();
+    });
+
+    btnStart.addEventListener('click', () => {
+      let mins = parseInt(minutesInput.value, 10);
+      if (isNaN(mins) || mins <= 0) {
+        mins = 10;
+        minutesInput.value = 10;
+      }
+      totalMinutes = mins;
+      hasPrep = prepCheckbox.checked;
+      hasWarningBeeps = warningBeepsCheckbox.checked;
+      prepSeconds = hasPrep ? 10 : 0;
+
+      getAudioContext();
+      enableSleepPrevention();
+      startWorkout();
+    });
+
+    function startWorkout() {
+      isRunning = true;
+      isPaused = false;
+      isPrepPhase = prepSeconds > 0;
+      pausedTimeAccumulated = 0;
+      lastWarningSecond = -1;
+      lastAnnouncedRound = 0;
+
+      prepDurationMs = prepSeconds * 1000;
+      totalDurationMs = totalMinutes * 60 * 1000;
+
+      // Auf Arena Mode umschalten (Desktop erweitert Container)
+      document.body.classList.add('workout-active');
+      setupView.style.display = 'none';
+      timerView.style.display = 'flex';
+      totalRoundsEl.textContent = totalMinutes;
+
+      btnPauseResume.textContent = '⏸ Pause';
+      btnPauseResume.className = 'btn btn-pause';
+
+      startTime = performance.now();
+
+      if (!isPrepPhase) {
+        lastAnnouncedRound = 1;
+        triggerMinuteTransition(1);
+      }
+
+      tick();
+    }
+
+    function tick() {
+      if (!isRunning) return;
+
+      const now = performance.now();
+      let elapsedTotal = 0;
+
+      if (!isPaused) {
+        elapsedTotal = now - startTime - pausedTimeAccumulated;
+      } else {
+        elapsedTotal = pauseStartTimestamp - startTime - pausedTimeAccumulated;
+      }
+
+      if (isPrepPhase) {
+        handlePrepPhase(elapsedTotal);
+      } else {
+        handleWorkoutPhase(elapsedTotal);
+      }
+
+      if (isRunning) {
+        animationFrameId = requestAnimationFrame(tick);
+      }
+    }
+
+    function handlePrepPhase(elapsedTotal) {
+      const prepRemainingMs = Math.max(0, prepDurationMs - elapsedTotal);
+      const remainingSec = Math.ceil(prepRemainingMs / 1000);
+
+      statusBadge.textContent = 'Vorbereitung';
+      statusBadge.className = 'status-badge prep';
+      currentRoundEl.textContent = 'Bereitmachen';
+      currentIntervalDisplay.textContent = 'Start in ' + remainingSec + 's';
+
+      minuteTimerDisplay.textContent = remainingSec;
+      minuteTimerSubtext.textContent = 'Bis Start';
+
+      const progressRatio = prepRemainingMs / prepDurationMs;
+      const offset = CIRCLE_CIRCUMFERENCE * (1 - progressRatio);
+      progressBar.style.strokeDashoffset = offset;
+      progressBar.classList.add('warning');
+
+      totalRemainingDisplay.textContent = formatTimeMS(totalMinutes * 60);
+      totalElapsedDisplay.textContent = '00:00';
+
+      if (remainingSec <= 5 && remainingSec > 0 && remainingSec !== lastWarningSecond) {
+        lastWarningSecond = remainingSec;
+        playWarningBeep();
+      }
+
+      if (prepRemainingMs <= 0) {
+        isPrepPhase = false;
+        startTime = performance.now();
+        pausedTimeAccumulated = 0;
+        lastWarningSecond = -1;
+        progressBar.classList.remove('warning');
+
+        lastAnnouncedRound = 1;
+        triggerMinuteTransition(1);
+      }
+    }
+
+    function handleWorkoutPhase(elapsedTotal) {
+      if (elapsedTotal >= totalDurationMs) {
+        finishWorkout();
+        return;
+      }
+
+      statusBadge.textContent = isPaused ? 'Pausiert' : 'EMOM Läuft';
+      statusBadge.className = isPaused ? 'status-badge paused' : 'status-badge';
+
+      const currentMinuteIndex = Math.floor(elapsedTotal / 60000);
+      const currentRoundNumber = currentMinuteIndex + 1;
+      const msInCurrentMinute = elapsedTotal % 60000;
+      const remainingMsInMinute = 60000 - msInCurrentMinute;
+      const remainingSecInMinute = Math.ceil(remainingMsInMinute / 1000);
+
+      currentRoundEl.textContent = currentRoundNumber;
+      currentIntervalDisplay.textContent = `Runde ${currentRoundNumber}`;
+
+      minuteTimerDisplay.textContent = remainingSecInMinute === 60 ? '60' : String(remainingSecInMinute).padStart(2, '0');
+      minuteTimerSubtext.textContent = 'Sekunden';
+
+      const minuteRatio = remainingMsInMinute / 60000;
+      const offset = CIRCLE_CIRCUMFERENCE * (1 - minuteRatio);
+      progressBar.style.strokeDashoffset = offset;
+
+      if (remainingSecInMinute <= 5) {
+        progressBar.classList.add('warning');
+      } else {
+        progressBar.classList.remove('warning');
+      }
+
+      const totalRemainingSec = Math.ceil((totalDurationMs - elapsedTotal) / 1000);
+      const totalElapsedSec = Math.floor(elapsedTotal / 1000);
+
+      totalRemainingDisplay.textContent = formatTimeMS(totalRemainingSec);
+      totalElapsedDisplay.textContent = formatTimeMS(totalElapsedSec);
+
+      // Neue Minute erreicht
+      if (currentRoundNumber > lastAnnouncedRound) {
+        lastAnnouncedRound = currentRoundNumber;
+        lastWarningSecond = -1;
+        triggerMinuteTransition(currentRoundNumber);
+      }
+
+      // 5-4-3-2-1 Vorwarnung vor der neuen Minute
+      if (hasWarningBeeps) {
+        if (remainingSecInMinute <= 5 && remainingSecInMinute >= 1) {
+          if (lastWarningSecond !== remainingSecInMinute) {
+            lastWarningSecond = remainingSecInMinute;
+            playWarningBeep();
+          }
+        } else if (remainingSecInMinute > 5) {
+          lastWarningSecond = -1;
+        }
+      }
+    }
+
+    function triggerMinuteTransition(roundNum) {
+      playNewMinuteSignal();
+
+      mainCard.classList.remove('flash-minute');
+      void mainCard.offsetWidth;
+      mainCard.classList.add('flash-minute');
+
+      minuteTimerDisplay.classList.add('pulse-text');
+      setTimeout(() => {
+        minuteTimerDisplay.classList.remove('pulse-text');
+      }, 500);
+    }
+
+    function finishWorkout() {
+      isRunning = false;
+      isPaused = false;
+      cancelAnimationFrame(animationFrameId);
+
+      statusBadge.textContent = 'Abgeschlossen! 🎉';
+      statusBadge.className = 'status-badge finished';
+
+      minuteTimerDisplay.textContent = '00';
+      minuteTimerSubtext.textContent = 'Fertig! 🎉';
+      progressBar.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE;
+      totalRemainingDisplay.textContent = '00:00';
+      totalElapsedDisplay.textContent = formatTimeMS(totalMinutes * 60);
+
+      btnPauseResume.style.display = 'none';
+
+      playWorkoutCompleteSignal();
+    }
+
+    btnPauseResume.addEventListener('click', () => {
+      if (!isRunning) return;
+
+      if (!isPaused) {
+        isPaused = true;
+        pauseStartTimestamp = performance.now();
+        btnPauseResume.textContent = '▶ Fortsetzen';
+        btnPauseResume.className = 'btn btn-primary';
+        statusBadge.textContent = 'Pausiert';
+        statusBadge.className = 'status-badge paused';
+      } else {
+        isPaused = false;
+        pausedTimeAccumulated += (performance.now() - pauseStartTimestamp);
+        btnPauseResume.textContent = '⏸ Pause';
+        btnPauseResume.className = 'btn btn-pause';
+        enableSleepPrevention();
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      if (confirm('Möchtest du das aktuelle Training beenden und zum Menü zurückkehren?')) {
+        resetWorkout();
+      }
+    });
+
+    function resetWorkout() {
+      isRunning = false;
+      isPaused = false;
+      isPrepPhase = false;
+      cancelAnimationFrame(animationFrameId);
+
+      document.body.classList.remove('workout-active');
+      timerView.style.display = 'none';
+      setupView.style.display = 'flex';
+      btnPauseResume.style.display = 'inline-flex';
+
+      progressBar.style.strokeDashoffset = 0;
+      progressBar.classList.remove('warning');
+      mainCard.classList.remove('flash-minute');
+      lastWarningSecond = -1;
+      lastAnnouncedRound = 0;
+    }
+
+    function formatTimeMS(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn('Vollbild nicht unterstützt:', err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    btnFullscreenTop.addEventListener('click', toggleFullscreen);
+    btnFullscreenBottom.addEventListener('click', toggleFullscreen);
+  </script>
+</body>
+</html>
