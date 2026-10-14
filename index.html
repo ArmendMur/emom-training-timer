@@ -653,9 +653,6 @@
       <div id="timerView" class="timer-display-view" style="display: none;">
         <div class="top-status-header">
           <div id="statusBadge" class="status-badge">Minute läuft</div>
-          <button type="button" id="btnFullscreenTop" class="btn-test" style="border-radius: 9999px;">
-            ⛶ Vollbild
-          </button>
         </div>
 
         <div class="workout-grid">
@@ -710,12 +707,6 @@
       </div>
     </div>
 
-    <!-- Footer Controls -->
-    <div class="footer-bar" style="justify-content: flex-end;">
-      <button type="button" id="btnFullscreenBottom" class="btn-test">
-        ⛶ Vollbildmodus
-      </button>
-    </div>
   </div>
 
   <script>
@@ -916,8 +907,6 @@
     const btnPauseResume = document.getElementById('btnPauseResume');
     const btnReset = document.getElementById('btnReset');
     const btnTestSound = document.getElementById('btnTestSound');
-    const btnFullscreenTop = document.getElementById('btnFullscreenTop');
-    const btnFullscreenBottom = document.getElementById('btnFullscreenBottom');
     const presetButtons = document.querySelectorAll('.btn-preset');
 
     const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 120; // ~753.98
@@ -1192,19 +1181,6 @@
       const seconds = totalSeconds % 60;
       return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
-
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-          console.warn('Vollbild nicht unterstützt:', err);
-        });
-      } else {
-        document.exitFullscreen();
-      }
-    }
-
-    btnFullscreenTop.addEventListener('click', toggleFullscreen);
-    btnFullscreenBottom.addEventListener('click', toggleFullscreen);
   </script>
 </body>
 </html>
