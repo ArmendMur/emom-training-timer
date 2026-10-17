@@ -40,30 +40,46 @@
     }
 
     body {
-      min-height: 100vh;
-      min-height: 100dvh;
+      height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+      padding: max(0.4rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.4rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
       transition: background-color 0.3s ease;
     }
 
-    /* Container: Auf Mobile kompakt, auf Desktop großzügig */
+    /* Container: Auf Mobile kompakt & immer in 100dvh zentriert, auf Desktop großzügig */
     .container {
       width: 100%;
       max-width: 650px;
+      height: 100%;
+      max-height: 100%;
       margin: auto;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      justify-content: center;
+      gap: clamp(0.35rem, 1vh, 1.25rem);
       transition: max-width 0.35s ease, padding 0.35s ease;
+      min-height: 0;
     }
 
     @media (min-width: 900px) {
+      body {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+        padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+      }
+
       .container {
         max-width: min(94vw, 1150px);
+        height: auto;
+        max-height: none;
       }
     }
 
@@ -507,6 +523,102 @@
       font-size: clamp(1.2rem, 2.5vw, 1.45rem);
       padding: clamp(1.15rem, 2vh, 1.4rem);
       width: 100%;
+    }
+
+    /* Auf Mobile Bildschirmen: Setup-Menü passt 100% ohne Scrollen in die Bildschirmhöhe */
+    @media (max-width: 899px) {
+      header h1 {
+        font-size: clamp(1.35rem, 2.8vh, 1.85rem);
+      }
+
+      header p {
+        font-size: clamp(0.72rem, 1.3vh, 0.85rem);
+        margin-top: 0.1rem;
+      }
+
+      .card {
+        padding: clamp(0.55rem, 1.5vh, 1.1rem) clamp(0.75rem, 2.5vw, 1.25rem);
+        border-radius: clamp(1rem, 2.5vw, 1.5rem);
+      }
+
+      .setup-group {
+        gap: clamp(0.3rem, 0.9vh, 0.65rem);
+      }
+
+      .setup-grid {
+        gap: clamp(0.3rem, 0.9vh, 0.65rem);
+      }
+
+      .setup-col {
+        gap: clamp(0.2rem, 0.7vh, 0.5rem);
+      }
+
+      .setup-col-right {
+        gap: clamp(0.2rem, 0.7vh, 0.5rem);
+      }
+
+      .input-label {
+        font-size: clamp(0.68rem, 1.2vh, 0.8rem);
+      }
+
+      .number-input-wrapper {
+        margin-top: 0.15rem;
+      }
+
+      input[type="number"] {
+        font-size: clamp(1.45rem, 2.8vh, 1.95rem);
+        padding: clamp(0.35rem, 0.8vh, 0.55rem);
+        border-radius: 0.75rem;
+      }
+
+      .quick-presets {
+        gap: clamp(0.2rem, 0.5vh, 0.4rem);
+        margin-top: 0.15rem;
+      }
+
+      .btn-preset {
+        padding: clamp(0.32rem, 0.75vh, 0.5rem) 0.2rem;
+        font-size: clamp(0.72rem, 1.35vh, 0.85rem);
+        border-radius: 0.6rem;
+      }
+
+      .options-row {
+        padding: clamp(0.32rem, 0.75vh, 0.55rem) 0.75rem;
+        gap: clamp(0.2rem, 0.5vh, 0.35rem);
+        border-radius: 0.75rem;
+        margin-top: 0.15rem;
+      }
+
+      .toggle-label {
+        font-size: clamp(0.72rem, 1.35vh, 0.85rem);
+        gap: 0.45rem;
+      }
+
+      .toggle-label input[type="checkbox"] {
+        width: 1.05rem;
+        height: 1.05rem;
+      }
+
+      .sound-settings-bar {
+        padding: clamp(0.32rem, 0.75vh, 0.55rem) 0.75rem;
+        border-radius: 0.75rem;
+        gap: 0.45rem;
+      }
+
+      .sound-settings-bar span {
+        font-size: clamp(0.68rem, 1.2vh, 0.78rem) !important;
+      }
+
+      .btn-test {
+        font-size: clamp(0.7rem, 1.25vh, 0.8rem);
+        padding: 0.3rem 0.6rem;
+      }
+
+      .btn-start-workout {
+        padding: clamp(0.55rem, 1.4vh, 0.9rem) 1rem;
+        font-size: clamp(0.95rem, 2vh, 1.2rem);
+        border-radius: 0.8rem;
+      }
     }
 
     @media (min-width: 900px) {
