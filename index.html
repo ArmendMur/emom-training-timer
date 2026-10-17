@@ -34,6 +34,7 @@
       color: var(--text-main);
       font-family: var(--font-family);
       overflow-x: hidden;
+      overscroll-behavior: none;
       user-select: none;
       -webkit-user-select: none;
     }
@@ -66,18 +67,144 @@
       }
     }
 
-    /* WIDE ARENA MODE: Wenn Workout läuft, maximal viel Platz auf dem PC nutzen */
+    /* WIDE ARENA & MOBILE FIT MODE: Kein Scrollen, maximale Bildschirmhöhe */
     body.workout-active {
-      padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+      height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      padding: max(0.4rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.4rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       transition: all 0.3s ease;
     }
 
     body.workout-active .container {
       width: 100%;
       max-width: 650px;
+      height: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       gap: 0;
+      min-height: 0;
     }
 
+    body.workout-active .card {
+      height: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      padding: clamp(0.5rem, 1.6vh, 1.25rem) clamp(0.75rem, 2.5vw, 1.25rem);
+    }
+
+    body.workout-active .timer-display-view {
+      height: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Auf Mobile Bildschirmen: Vertikale Arena die 100% ohne Scrollen passt */
+    @media (max-width: 899px) {
+      body.workout-active .workout-grid {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        min-height: 0;
+        gap: clamp(0.2rem, 0.8vh, 0.5rem);
+        flex: 1;
+        overflow: hidden;
+      }
+
+      body.workout-active .arena-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      body.workout-active .top-status-header {
+        margin-bottom: 0.15rem;
+      }
+
+      body.workout-active .status-badge {
+        padding: 0.25rem 0.75rem;
+        font-size: clamp(0.7rem, 1.4vh, 0.85rem);
+      }
+
+      body.workout-active .round-indicator {
+        font-size: clamp(1.15rem, 2.4vh, 1.65rem);
+        margin-bottom: clamp(0.1rem, 0.4vh, 0.35rem);
+      }
+
+      body.workout-active .progress-circle-wrap {
+        width: min(44vmin, 26vh, 230px);
+        height: min(44vmin, 26vh, 230px);
+        margin: clamp(0.1rem, 0.4vh, 0.35rem) auto;
+        flex-shrink: 1;
+      }
+
+      body.workout-active .arena-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: clamp(0.25rem, 0.7vh, 0.5rem);
+        flex: 0 0 auto;
+        width: 100%;
+      }
+
+      body.workout-active .stats-dashboard {
+        gap: 0.45rem;
+      }
+
+      body.workout-active .stat-card {
+        padding: clamp(0.3rem, 0.8vh, 0.6rem) 0.5rem;
+        border-radius: 0.75rem;
+      }
+
+      body.workout-active .stat-card .lbl {
+        font-size: clamp(0.6rem, 1.1vh, 0.75rem);
+        margin-bottom: 0.1rem;
+      }
+
+      body.workout-active .stat-card .val {
+        font-size: clamp(1.3rem, 2.6vh, 1.85rem);
+        line-height: 1.05;
+      }
+
+      body.workout-active .stat-card.status-phase {
+        padding: clamp(0.25rem, 0.7vh, 0.5rem) 0.5rem;
+      }
+
+      body.workout-active .stat-card.status-phase .val {
+        font-size: clamp(1.1rem, 2.2vh, 1.5rem);
+      }
+
+      body.workout-active .controls {
+        gap: 0.5rem;
+      }
+
+      body.workout-active .btn {
+        padding: clamp(0.55rem, 1.4vh, 0.85rem) 0.75rem;
+        font-size: clamp(0.9rem, 1.9vh, 1.1rem);
+        border-radius: 0.75rem;
+      }
+    }
+
+    /* Auf Desktop PC (min-width: 900px): Horizontales Arena Stadium Layout */
     @media (min-width: 900px) {
       body.workout-active {
         height: 100vh;
@@ -514,9 +641,9 @@
     /* Riesiger Fortschrittsring */
     .progress-circle-wrap {
       position: relative;
-      width: clamp(260px, 44vmin, 480px);
-      height: clamp(260px, 44vmin, 480px);
-      margin: 0.5rem auto;
+      width: min(44vmin, 26vh, 260px);
+      height: min(44vmin, 26vh, 260px);
+      margin: 0.35rem auto;
       display: flex;
       align-items: center;
       justify-content: center;
