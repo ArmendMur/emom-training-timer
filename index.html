@@ -49,7 +49,7 @@
       transition: background-color 0.3s ease;
     }
 
-    /* Container: Standard für Setup, erweitert sich im Workout für PC & Handy */
+    /* Container: Auf Mobile kompakt, auf Desktop großzügig */
     .container {
       width: 100%;
       max-width: 650px;
@@ -60,11 +60,125 @@
       transition: max-width 0.35s ease, padding 0.35s ease;
     }
 
-    /* WIDE ARENA MODE: Wenn Workout läuft, viel Platz auf dem PC nutzen */
+    @media (min-width: 900px) {
+      .container {
+        max-width: min(94vw, 1150px);
+      }
+    }
+
+    /* WIDE ARENA MODE: Wenn Workout läuft, maximal viel Platz auf dem PC nutzen */
+    body.workout-active {
+      padding: clamp(0.5rem, 1.5vh, 1.25rem) clamp(0.75rem, 1.5vw, 1.75rem);
+      transition: all 0.3s ease;
+    }
+
     body.workout-active .container {
-      max-width: min(96vw, 1550px);
-      width: 96vw;
-      gap: 1.5rem;
+      max-width: min(98vw, 1950px);
+      width: 98vw;
+      gap: 0;
+    }
+
+    @media (min-width: 900px) {
+      body.workout-active {
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      body.workout-active .container {
+        height: calc(100vh - 2rem);
+        max-height: calc(100vh - 2rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      body.workout-active .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: clamp(1.25rem, 2.5vw, 2.8rem) clamp(1.75rem, 3.5vw, 4.5rem);
+      }
+
+      body.workout-active .timer-display-view {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      body.workout-active .workout-grid {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        align-items: center;
+        gap: clamp(2.5rem, 5vw, 6.5rem);
+        width: 100%;
+      }
+
+      body.workout-active .arena-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      body.workout-active .progress-circle-wrap {
+        width: min(58vmin, 620px);
+        height: min(58vmin, 620px);
+        margin: 0.5rem auto;
+      }
+
+      body.workout-active .minute-seconds-text {
+        font-size: clamp(5rem, 36cqw, 14.5rem);
+      }
+
+      body.workout-active .minute-subtext {
+        font-size: clamp(0.85rem, 5.2cqw, 1.4rem);
+      }
+
+      body.workout-active .round-indicator {
+        font-size: clamp(2rem, 3.5vw, 3.6rem);
+        margin-bottom: 1.25rem;
+      }
+
+      body.workout-active .arena-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: clamp(1.2rem, 2.2vh, 2rem);
+        width: 100%;
+      }
+
+      body.workout-active .stat-card {
+        padding: clamp(1.2rem, 2.5vh, 2.4rem) clamp(1.2rem, 2vw, 2.2rem);
+      }
+
+      body.workout-active .stat-card .lbl {
+        font-size: clamp(0.95rem, 1.2vw, 1.25rem);
+        margin-bottom: 0.5rem;
+      }
+
+      body.workout-active .stat-card .val {
+        font-size: clamp(2.6rem, 4.5vw, 5.5rem);
+      }
+
+      body.workout-active .stat-card.status-phase .val {
+        font-size: clamp(2.4rem, 4vw, 4.5rem);
+      }
+
+      body.workout-active .controls {
+        gap: clamp(1rem, 2vw, 1.75rem);
+      }
+
+      body.workout-active .btn {
+        padding: clamp(1.2rem, 2.5vh, 1.75rem) clamp(1.5rem, 2.5vw, 2.5rem);
+        font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+      }
     }
 
     header {
@@ -131,6 +245,27 @@
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      width: 100%;
+    }
+
+    .setup-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .setup-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .setup-col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      justify-content: space-between;
     }
 
     .input-label {
@@ -201,18 +336,19 @@
 
     .options-row {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      flex-direction: column;
+      gap: 0.85rem;
+      background: #090e1a;
+      padding: 1rem 1.25rem;
+      border-radius: 1rem;
+      border: 1px solid #1a253d;
+      margin-top: 0.5rem;
     }
 
     .toggle-label {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.75rem;
       font-size: 0.95rem;
       color: #cbd5e1;
       cursor: pointer;
@@ -232,9 +368,48 @@
       align-items: center;
       gap: 1rem;
       background: #0b1120;
-      padding: 0.85rem 1.15rem;
+      padding: 0.95rem 1.2rem;
       border-radius: 1rem;
       border: 1px solid #1a253d;
+    }
+
+    .btn-start-workout {
+      font-size: clamp(1.2rem, 2.5vw, 1.45rem);
+      padding: clamp(1.15rem, 2vh, 1.4rem);
+      width: 100%;
+    }
+
+    @media (min-width: 900px) {
+      .setup-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2.75rem;
+        align-items: stretch;
+      }
+
+      .setup-col-right {
+        height: 100%;
+      }
+
+      .btn-start-workout {
+        margin-top: auto;
+        font-size: 1.4rem;
+        padding: 1.35rem;
+      }
+
+      .quick-presets {
+        gap: 0.75rem;
+      }
+
+      .btn-preset {
+        padding: 0.95rem 0.5rem;
+        font-size: 1.05rem;
+      }
+
+      input[type="number"] {
+        font-size: 2.75rem;
+        padding: 1rem;
+      }
     }
 
     /* =========================================
@@ -255,14 +430,6 @@
       width: 100%;
     }
 
-    @media (min-width: 900px) {
-      .workout-grid {
-        display: grid;
-        grid-template-columns: 1.1fr 1fr;
-        align-items: center;
-        gap: 3rem;
-      }
-    }
 
     /* Linke Spalte: Runder Stadium-Timer */
     .arena-left {
@@ -598,55 +765,66 @@
     <div class="card" id="mainCard">
       <!-- SETUP VIEW -->
       <div id="setupView" class="setup-group">
-        <div>
-          <label for="minutesInput" class="input-label">Gesamtdauer (Minuten)</label>
-          <div class="number-input-wrapper">
-            <input type="number" id="minutesInput" min="1" max="180" value="10" placeholder="10">
+        <div class="setup-grid">
+          <!-- Linke Spalte: Dauer & Schnellauswahl -->
+          <div class="setup-col">
+            <div>
+              <label for="minutesInput" class="input-label">Gesamtdauer (Minuten)</label>
+              <div class="number-input-wrapper">
+                <input type="number" id="minutesInput" min="1" max="180" value="10" placeholder="10">
+              </div>
+            </div>
+
+            <div>
+              <div class="input-label">Schnellauswahl</div>
+              <div class="quick-presets">
+                <button type="button" class="btn-preset" data-min="5">5 Min</button>
+                <button type="button" class="btn-preset active" data-min="10">10 Min</button>
+                <button type="button" class="btn-preset" data-min="15">15 Min</button>
+                <button type="button" class="btn-preset" data-min="20">20 Min</button>
+                <button type="button" class="btn-preset" data-min="25">25 Min</button>
+                <button type="button" class="btn-preset" data-min="30">30 Min</button>
+                <button type="button" class="btn-preset" data-min="45">45 Min</button>
+                <button type="button" class="btn-preset" data-min="60">60 Min</button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <div class="input-label">Schnellauswahl</div>
-          <div class="quick-presets">
-            <button type="button" class="btn-preset" data-min="5">5 Min</button>
-            <button type="button" class="btn-preset active" data-min="10">10 Min</button>
-            <button type="button" class="btn-preset" data-min="15">15 Min</button>
-            <button type="button" class="btn-preset" data-min="20">20 Min</button>
-            <button type="button" class="btn-preset" data-min="25">25 Min</button>
-            <button type="button" class="btn-preset" data-min="30">30 Min</button>
-            <button type="button" class="btn-preset" data-min="45">45 Min</button>
-            <button type="button" class="btn-preset" data-min="60">60 Min</button>
-          </div>
-        </div>
+          <!-- Rechte Spalte: Optionen, Sound & Start-Button -->
+          <div class="setup-col setup-col-right">
+            <div>
+              <div class="input-label">Optionen</div>
+              <div class="options-row">
+                <label class="toggle-label" title="10 Sekunden Vorbereitungszeit vor Beginn des Workouts">
+                  <input type="checkbox" id="prepCountdownCheckbox" checked>
+                  <span>10 Sek. Vorbereitung</span>
+                </label>
 
-        <div class="options-row">
-          <label class="toggle-label" title="10 Sekunden Vorbereitungszeit vor Beginn des Workouts">
-            <input type="checkbox" id="prepCountdownCheckbox" checked>
-            <span>10 Sek. Vorbereitung</span>
-          </label>
+                <label class="toggle-label" title="Piept bei Sekunde 5, 4, 3, 2, 1 vor jeder neuen Minute">
+                  <input type="checkbox" id="warningBeepsCheckbox" checked>
+                  <span>5-4-3-2-1 Countdown-Piepser</span>
+                </label>
+              </div>
+            </div>
 
-          <label class="toggle-label" title="Piept bei Sekunde 5, 4, 3, 2, 1 vor jeder neuen Minute">
-            <input type="checkbox" id="warningBeepsCheckbox" checked>
-            <span>5-4-3-2-1 Countdown-Piepser</span>
-          </label>
-        </div>
+            <div class="sound-settings-bar">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <button type="button" id="btnTestSound" class="btn-test">
+                  🔊 Ton testen
+                </button>
+                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-muted);">
+                  <span>Lautstärke:</span>
+                  <input type="range" id="volumeSlider" min="0.1" max="1" step="0.05" value="0.75" style="width: 85px; accent-color: var(--accent);">
+                </label>
+              </div>
+              <span style="font-size: 0.85rem; color: #38bdf8;">🔔 Jede Minute ertönt ein Signal</span>
+            </div>
 
-        <div class="sound-settings-bar">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <button type="button" id="btnTestSound" class="btn-test">
-              🔊 Ton testen
+            <button type="button" id="btnStart" class="btn btn-primary btn-start-workout">
+              ▶ Training Starten
             </button>
-            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-muted);">
-              <span>Lautstärke:</span>
-              <input type="range" id="volumeSlider" min="0.1" max="1" step="0.05" value="0.75" style="width: 85px; accent-color: var(--accent);">
-            </label>
           </div>
-          <span style="font-size: 0.85rem; color: #38bdf8;">🔔 Jede Minute ertönt ein Signal</span>
         </div>
-
-        <button type="button" id="btnStart" class="btn btn-primary" style="font-size: 1.3rem; padding: 1.25rem;">
-          ▶ Training Starten
-        </button>
       </div>
 
       <!-- RUNNING TIMER VIEW (ARENA MODE) -->
@@ -688,9 +866,9 @@
               </div>
             </div>
 
-            <div class="stat-card" style="padding: 1rem;">
+            <div class="stat-card status-phase">
               <div class="lbl">Status / Phase</div>
-              <div class="val" id="currentIntervalDisplay" style="color: var(--accent); font-size: clamp(1.4rem, 3vw, 2.2rem);">Runde 1</div>
+              <div class="val" id="currentIntervalDisplay" style="color: var(--accent);">Runde 1</div>
             </div>
 
             <!-- Action Buttons -->
