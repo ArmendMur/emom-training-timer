@@ -1013,7 +1013,7 @@
             <div>
               <label for="minutesInput" class="input-label">Gesamtdauer (Minuten)</label>
               <div class="number-input-wrapper">
-                <input type="number" id="minutesInput" min="1" max="180" value="10" placeholder="10">
+                <input type="number" id="minutesInput" min="1" max="180" value="30" placeholder="30">
               </div>
             </div>
 
@@ -1021,11 +1021,11 @@
               <div class="input-label">Schnellauswahl</div>
               <div class="quick-presets">
                 <button type="button" class="btn-preset" data-min="5">5 Min</button>
-                <button type="button" class="btn-preset active" data-min="10">10 Min</button>
+                <button type="button" class="btn-preset" data-min="10">10 Min</button>
                 <button type="button" class="btn-preset" data-min="15">15 Min</button>
                 <button type="button" class="btn-preset" data-min="20">20 Min</button>
                 <button type="button" class="btn-preset" data-min="25">25 Min</button>
-                <button type="button" class="btn-preset" data-min="30">30 Min</button>
+                <button type="button" class="btn-preset active" data-min="30">30 Min</button>
                 <button type="button" class="btn-preset" data-min="45">45 Min</button>
                 <button type="button" class="btn-preset" data-min="60">60 Min</button>
               </div>
@@ -1079,7 +1079,7 @@
           <!-- Arena Linke Spalte (Kreis-Timer) -->
           <div class="arena-left">
             <div class="round-indicator" id="roundIndicator">
-              Minute <span id="currentRound">1</span> von <span id="totalRounds">10</span>
+              Minute <span id="currentRound">1</span> von <span id="totalRounds">30</span>
             </div>
 
             <!-- Großer Fortschrittsring -->
@@ -1100,7 +1100,7 @@
             <div class="stats-dashboard">
               <div class="stat-card highlight">
                 <div class="lbl">Verbleibende Gesamtzeit</div>
-                <div class="val" id="totalRemainingDisplay">10:00</div>
+                <div class="val" id="totalRemainingDisplay">30:00</div>
               </div>
               <div class="stat-card">
                 <div class="lbl">Bereits Verstrichen</div>
@@ -1286,7 +1286,7 @@
     // =========================================================================
     // 3. TIMER LOGIK & ARENA DISPLAY
     // =========================================================================
-    let totalMinutes = 10;
+    let totalMinutes = 30;
     let prepSeconds = 10;
     let hasPrep = true;
     let hasWarningBeeps = true;
@@ -1361,8 +1361,8 @@
     btnStart.addEventListener('click', () => {
       let mins = parseInt(minutesInput.value, 10);
       if (isNaN(mins) || mins <= 0) {
-        mins = 10;
-        minutesInput.value = 10;
+        mins = 30;
+        minutesInput.value = 30;
       }
       totalMinutes = mins;
       hasPrep = prepCheckbox.checked;
